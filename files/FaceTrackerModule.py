@@ -5,7 +5,7 @@ import numpy as np
 face_cascade = cv2.CascadeClassifier(os.path.join('haarcascades', 'haarcascade_frontalface_default.xml'))
 hand_cascade = cv2.CascadeClassifier(os.path.join('haarcascades', 'haarcascade_frontalface_default.xml'))
 
-fbRange = [10000, 16000]
+fbRange = [10000, 14000]
 pid = [0.4, 0.4, 0]
 pErrorYV, pErrorUD = 0, 0
 

@@ -1,12 +1,15 @@
 from FaceTrackerModule import *
 from djitellopy import tello
-from time import sleep
+from time import sleep, time
 import cv2
 
 pErrorYV, pErrorUD = 0, 0
 HEIGHT, WIDTH = 360, 480
 
 drone = tello.Tello()
+keepRecording = True
+
+testing = 1
 
 def init():
         drone.connect()
@@ -16,14 +19,16 @@ def init():
 
         print(drone.get_battery())
 
-        drone.takeoff()
-        drone.move_up(80)
+        if not testing:
+                drone.takeoff()
+                drone.move_up(80)
 
         img = get_image()
         img, face_info, hand_info = processFrame(img)
 
         while face_info[1] == 0:
-                drone.send_rc_control(0, 0, 0, 20)
+                if not testing:
+                        drone.send_rc_control(0, 0, 0, 20)
                 img = get_image()
                 if img is None:
                         continue
@@ -33,7 +38,8 @@ def init():
                 if k == 27:
                         return False
 
-        drone.send_rc_control(0, 0, 0, 0)
+        if not testing:
+                drone.send_rc_control(0, 0, 0, 0)
 
         return True
 
@@ -49,6 +55,9 @@ def main():
                 return
 
         global pErrorYV, pErrorUD
+
+        video1 = cv2.VideoWriter(os.path.join('images', '{}raw.avi'.format(time())), cv2.VideoWriter_fourcc(*'XVID'), 30, (WIDTH, HEIGHT))
+        video2 = cv2.VideoWriter(os.path.join('images', '{}.avi'.format(time())), cv2.VideoWriter_fourcc(*'XVID'), 30, (WIDTH, HEIGHT))
         
         run = True
         while run:
@@ -57,20 +66,33 @@ def main():
                 if img is None:
                         continue
 
+                raw = img.copy()
+
                 img, face_info, hand_info = processFrame(img)
                 commands, pErrorYV, pErrorUD = follow_face(face_info, pErrorYV, pErrorUD)
                 displayText(img, commands, face_info, hand_info)    
-                cv2.imshow('img', img)
+                cv2.imshow('img', raw)
+                cv2.imshow('processed', img)
+                video1.write(raw)
+                video2.write(img)
 
                 lr, fb, ud, yv = commands
-                drone.send_rc_control(lr, fb, ud, yv)
+                if not testing:
+                        drone.send_rc_control(lr, fb, ud, yv)
 
                 k = cv2.waitKey(30) & 0xff
                 if k == 27:
                         run = False
 
+                if drone.get_battery() < 20:
+                        run = False
+
+        video1.release()
+        video2.release()
+
         cv2.destroyAllWindows()
-        drone.land()
+        if not testing:
+                drone.land()
         drone.end()
 
 
