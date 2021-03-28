@@ -9,7 +9,7 @@ fbRange = [10000, 14000]
 pid = [0.4, 0.4, 0]
 pErrorYV, pErrorUD = 0, 0
 
-# cap = cv2.VideoCapture(0)
+cap = 0
 
 HEIGHT, WIDTH = 360, 480
 
@@ -56,6 +56,7 @@ def displayText(img, commands, face_info, hand_info):
         (cx, cy), area = face_info
 
         if area == 0:
+                cv2.putText(img, 'searching for face...', (30,30),  cv2.FONT_HERSHEY_COMPLEX,  0.5,  (0, 0, 255),  2)
                 return
 
         global HEIGHT, WIDTH
@@ -90,7 +91,7 @@ def follow_face(info, pErrorYV, pErrorUD, vel = 20):
         global HEIGHT, WIDTH
         
         if area == 0:
-                commands = [0, 0, 0, 0]
+                commands = [0, 0, 0, 20]
                 errorUD, errorYV = 0, 0
                 return commands, errorYV, errorUD
 
@@ -115,6 +116,9 @@ def follow_face(info, pErrorYV, pErrorUD, vel = 20):
 def main():
 
         pErrorYV, pErrorUD = 0, 0
+
+        global cap
+        cap = cv2.VideoCapture(0)
         _, img = cap.read()
         global HEIGHT, WIDTH
         HEIGHT, WIDTH, _ = img.shape

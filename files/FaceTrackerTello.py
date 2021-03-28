@@ -9,7 +9,7 @@ HEIGHT, WIDTH = 360, 480
 drone = tello.Tello()
 keepRecording = True
 
-testing = 1
+testing = 0
 
 def init():
         drone.connect()
@@ -22,24 +22,6 @@ def init():
         if not testing:
                 drone.takeoff()
                 drone.move_up(80)
-
-        img = get_image()
-        img, face_info, hand_info = processFrame(img)
-
-        while face_info[1] == 0:
-                if not testing:
-                        drone.send_rc_control(0, 0, 0, 20)
-                img = get_image()
-                if img is None:
-                        continue
-                img, face_info, hand_info = processFrame(img)
-                cv2.imshow('img', img)
-                k = cv2.waitKey(30) & 0xff
-                if k == 27:
-                        return False
-
-        if not testing:
-                drone.send_rc_control(0, 0, 0, 0)
 
         return True
 
